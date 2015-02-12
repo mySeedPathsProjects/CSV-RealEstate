@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,92 +20,169 @@ namespace CSV_RealEstate
             
             //Display the average square footage of a Condo sold in the city of Sacramento, 
             //Use the GetAverageSquareFootageByRealEstateTypeAndCity() function.
+            Console.WriteLine(GetAverageSquareFootageByRealEstateTypeAndCity(realEstateSaleList, RealEstateType.Condo, "Sacramento"));
 
             //Display the total sales of all residential homes in Elk Grove.  Use the GetTotalSalesByRealEstateTypeAndCity() function for testing.
+            Console.WriteLine(GetTotalSalesByRealEstateTypeAndCity(realEstateSaleList, RealEstateType.Residential, "Elk Grove"));
 
             //Display the total number of residential homes sold in the zip code 95842.  Use the GetNumberOfSalesByRealEstateTypeAndZip() function for testing.
+            Console.WriteLine(GetNumberOfSalesByRealEstateTypeAndZip(realEstateSaleList, RealEstateType.Residential, "95842"));
 
             //Display the average sale price of a lot in Sacramento.  Use the GetAverageSalePriceByRealEstateTypeAndCity() function for testing.
+            Console.WriteLine(GetAverageSalePriceByRealEstateTypeAndCity(realEstateSaleList, RealEstateType.Lot, "Sacramento"));
 
             //Display the average price per square foot for a condo in Sacramento. Round to 2 decimal places. Use the GetAveragePricePerSquareFootByRealEstateTypeAndCity() function for testing.
+            Console.WriteLine(GetAveragePricePerSquareFootByRealEstateTypeAndCity(realEstateSaleList, RealEstateType.Condo, "Sacramento"));
 
             //Display the number of all sales that were completed on a Wednesday.  Use the GetNumberOfSalesByDayOfWeek() function for testing.
-
+            Console.WriteLine(GetNumberOfSalesByDayOfWeek(realEstateSaleList, DayOfWeek.Wednesday));
 
             //Display the average number of bedrooms for a residential home in Sacramento when the 
             // price is greater than 300000.  Round to 2 decimal places.  Use the GetAverageBedsByRealEstateTypeAndCityHigherThanPrice() function for testing.
+            Console.WriteLine(GetAverageBedsByRealEstateTypeAndCityHigherThanPrice(realEstateSaleList, RealEstateType.Residential, "Sacramento", 300000m));
 
             //Extra Credit:
             //Display top 5 cities by the number of homes sold (using the GroupBy extension)
             // Use the GetTop5CitiesByNumberOfHomesSold() function for testing.
+            List<string> top5Cities = GetTop5CitiesByNumberOfHomesSold(realEstateSaleList);
+            foreach (string city in top5Cities)
+            {
+                Console.WriteLine(city);
+            }
 
+            Console.ReadKey();
         }
 
         public static List<RealEstateSale> GetRealEstateSaleList()
-        {
-         
+        {         
             //read in the realestatedata.csv file.  As you process each row, you'll add a new 
             // RealEstateData object to the list for each row of the document, excluding the first.  bool skipFirstLine = true;
-         
-            return new List<RealEstateSale>();
+
+            List<RealEstateSale> tempSaleList = new List<RealEstateSale>();
+
+            // load data
+            //"using" creates a temporary variable (in this case "reader")
+            using (StreamReader reader = new StreamReader("realestatedata.csv"))
+            {
+                // Get and don't use the first line
+                string firstline = reader.ReadLine();
+                // Loop through the rest of the lines
+                while (!reader.EndOfStream)
+                {
+                     tempSaleList.Add(new RealEstateSale(reader.ReadLine()));
+                }
+            }        
+            return tempSaleList;
         }
+
+
+
+
 
         public static double GetAverageSquareFootageByRealEstateTypeAndCity(List<RealEstateSale> realEstateDataList, RealEstateType realEstateType, string city) 
         {
-            return 0.0;
+            return realEstateDataList.Where(x => x.City.ToLower() == city.ToLower() && x.Type == realEstateType).Select(x => x.SqFt).ToList().Average();
         }
 
         public static decimal GetTotalSalesByRealEstateTypeAndCity(List<RealEstateSale> realEstateDataList, RealEstateType realEstateType, string city)
         {
-            return 0.0m;
+            return realEstateDataList.Where(x => x.City.ToLower() == city.ToLower() && x.Type == realEstateType).Select(x => x.Price).Sum();
         }
 
         public static int GetNumberOfSalesByRealEstateTypeAndZip(List<RealEstateSale> realEstateDataList, RealEstateType realEstateType, string zipcode)
         {
-            return 0;
+            return realEstateDataList.Where(x => x.Type == realEstateType && x.Zip == zipcode).Count();
         }
-
-        
+       
         public static decimal GetAverageSalePriceByRealEstateTypeAndCity(List<RealEstateSale> realEstateDataList, RealEstateType realEstateType, string city)
         {
             //Must round to 2 decimal points
-            return 0.0m;
+            return Math.Round(realEstateDataList.Where(x => x.Type == realEstateType && x.City.ToLower() == city.ToLower()).Select(x => x.Price).Average(), 2);
         }
+
         public static decimal GetAveragePricePerSquareFootByRealEstateTypeAndCity(List<RealEstateSale> realEstateDataList, RealEstateType realEstateType, string city)
         {
             //Must round to 2 decimal points
-            return 0.0m;
+            return Math.Round(Convert.ToDecimal((realEstateDataList.Where(x => x.Type == realEstateType && x.City.ToLower() == city.ToLower()).Average(x => x.Price/x.SqFt))), 2);
         }
 
         public static int GetNumberOfSalesByDayOfWeek(List<RealEstateSale> realEstateDataList, DayOfWeek dayOfWeek)
         {
-            return 0;
+            return realEstateDataList.Where(x => x.SaleDate.DayOfWeek == dayOfWeek).Count();
         }
+
 
         public static double GetAverageBedsByRealEstateTypeAndCityHigherThanPrice(List<RealEstateSale> realEstateDataList, RealEstateType realEstateType, string city, decimal price)
         {
             //Must round to 2 decimal points
-            return 0.0;
+            return Math.Round(Convert.ToDouble(realEstateDataList.Where(x => x.Type == realEstateType && x.City.ToLower() == city.ToLower() && x.Price > price).Average(x => x.Beds)), 2);
         }
 
         public static List<string> GetTop5CitiesByNumberOfHomesSold(List<RealEstateSale> realEstateDataList)
         {
-            return new List<string>();
+            return realEstateDataList.GroupBy(x => x.City).OrderByDescending(x => x.Count()).Select(x => x.Key).Take(5).ToList();
         }
     }
+
+
+
 
     public enum RealEstateType
     {
         //fill in with enum types: Residential, MultiFamily, Condo, Lot
+        Residential,
+        MultiFamily,
+        Condo,
+        Lot
     }
     class RealEstateSale
     {
         //Create properties, using the correct data types (not all are strings) for all columns of the CSV
+        public string Street { get; set; }
+        public string City { get; set; }
+        public string Zip { get; set; }
+        public string State { get; set; }
+        public int Beds { get; set; }
+        public int Baths { get; set; }
+        public int SqFt { get; set; }
+        public RealEstateType Type { get; set; }
+        public DateTime SaleDate { get; set; }
+        public decimal Price { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+
 
         //The constructor will take a single string arguement.  This string will be one line of the real estate data.
         // Inside the constructor, you will seperate the values into their corrosponding properties, and do the necessary conversions
+        public RealEstateSale(string lineInput)
+        {
+            string[] realEstateData = lineInput.Split(',');
 
-        //When computing the RealEstateType, if the square footage is 0, then it is of the Lot type, otherwise, use the string
-        // value of the "Type" column to determine its corresponding enumeration type.
+            this.Street = realEstateData[0];
+            this.City = realEstateData[1];
+            this.Zip = realEstateData[2];
+            this.State = realEstateData[3];
+            this.Beds = Convert.ToInt32(realEstateData[4]);
+            this.Baths = Convert.ToInt32(realEstateData[5]);
+            this.SqFt = Convert.ToInt32(realEstateData[6]);
+            //When computing the RealEstateType, if the square footage is 0, then it is of the Lot type, otherwise, use the string
+            // value of the "Type" column to determine its corresponding enumeration type.
+            if (this.SqFt == 0)
+            {
+                this.Type = RealEstateType.Lot;
+            }
+            else if (realEstateData[7] == "Multi-Family")
+            {
+                this.Type = RealEstateType.MultiFamily;
+            }
+            else
+            {
+                this.Type = (RealEstateType)Enum.Parse(typeof(RealEstateType), realEstateData[7]);
+            }
+            this.SaleDate = DateTime.Parse(realEstateData[8]);
+            this.Price = Convert.ToDecimal(realEstateData[9]);
+            this.Latitude = Convert.ToDouble(realEstateData[10]);
+            this.Longitude = Convert.ToDouble(realEstateData[11]);
+        }
     }
 }
